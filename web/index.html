@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23080B10'/%3E%3Cpath d='M16 5 27 16 16 27 5 16Z' fill='none' stroke='%237EE7D0'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%237EE7D0'/%3E%3C/svg%3E">
+<title>Observatory — Visual Workbench</title>
+<style>
+:root{ --bg:#080B10; --bg2:#0A0E14; --panel:#0B1017; --panel2:#0E141C;
+--ink:#E7EDF1; --muted:#7A8691; --dim:#4C5762; --line:rgba(231,237,241,.08); --line2:rgba(231,237,241,.14);
+--accent:#7EE7D0; --accent-dim:rgba(126,231,208,.10); --blue:#8FB8FF; --violet:#B9A6FF; --amber:#E8C27E; --red:#FF8F8F;
+--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace;
+} *{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%} body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13px;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer} ::selection{background:rgba(126,231,208,.22)}
+.micro,.eyebrow{font-family:var(--mono);text-transform:uppercase;color:var(--muted);white-space:nowrap} .eyebrow{font-size:8.5px;letter-spacing:.2em}
+.micro{font-size:9px;letter-spacing:.1em} .app{display:grid;grid-template-rows:64px 1fr 34px;height:100dvh;min-height:480px}
+header{border-bottom:1px solid var(--line);display:flex;align-items:center;gap:22px;padding:0 22px;background:linear-gradient(180deg,#0A0E14,#080B10)} .brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{width:26px;height:26px;color:var(--accent);flex:none;opacity:.92} .wordmark,.product{display:flex;flex-direction:column;gap:4px;line-height:1}
+.wordmark b,.product b{font-family:var(--mono);font-weight:600;letter-spacing:.24em;font-size:13px} .wordmark span,.product span{font-family:var(--mono);font-size:7.5px;letter-spacing:.17em;color:var(--dim);text-transform:uppercase}
+.slash{color:var(--dim);font-family:var(--mono);font-size:16px;font-weight:300;transform:translateY(-1px)} .product b{color:var(--muted);font-weight:500;letter-spacing:.2em}
+.product span{color:var(--dim)} .flow-meta{margin-left:8px;padding-left:22px;border-left:1px solid var(--line);display:flex;align-items:baseline;gap:10px;min-width:0}
+.flow-meta .eyebrow{font-size:7.5px} #flowName{font-size:13px;font-weight:500;letter-spacing:.01em;white-space:nowrap}
+#flowCounts{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.08em;white-space:nowrap} .actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+.pill{display:flex;align-items:center;gap:7px;height:26px;padding:0 10px;border:1px solid var(--line);border-radius:2px;font-family:var(--mono);font-size:8px;letter-spacing:.15em;color:var(--muted);text-transform:uppercase} .pill .dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(126,231,208,.55)}
+.pill.offline .dot{background:var(--amber);box-shadow:none} .btn{height:32px;padding:0 14px;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);border-radius:2px;font-family:var(--mono);font-size:8.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;transition:.18s ease}
+.btn:hover{border-color:rgba(126,231,208,.45);color:var(--accent)} .btn:focus-visible,.zoom button:focus-visible,.palette button:focus-visible,.run:focus-visible,.trow:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#04110E} .btn.primary:hover{background:#9AF0DE;border-color:#9AF0DE;color:#04110E;box-shadow:0 0 24px rgba(126,231,208,.18)}
+.btn.primary::before{content:"";width:0;height:0;border-left:5px solid #04110E;border-top:3.5px solid transparent;border-bottom:3.5px solid transparent} .btn.ghost::before{content:"↺";font-size:12px;line-height:1;font-weight:400}
+.btn[disabled]{opacity:.45;pointer-events:none} main{display:grid;grid-template-columns:236px minmax(0,1fr) 356px;min-height:0}
+.left,.right{background:var(--panel);display:flex;flex-direction:column;min-height:0} .left{border-right:1px solid var(--line)}
+.right{border-left:1px solid var(--line);background:var(--panel2)} .pane-head{height:42px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line)}
+.pane-head .count{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.1em} .palette{flex:none;padding:8px 8px 10px}
+.palette button{width:100%;display:grid;grid-template-columns:8px 1fr auto;align-items:center;gap:10px;padding:9px 10px;border-radius:2px;text-align:left;color:var(--muted);transition:.14s ease} .palette button:hover{background:rgba(231,237,241,.03);color:var(--ink)}
+.palette button.active{background:var(--accent-dim);color:var(--accent);box-shadow:inset 2px 0 0 var(--accent)} .palette .swatch{width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 8px color-mix(in srgb,var(--c) 45%,transparent)}
+.palette .p-name{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase} .palette .p-count{font-family:var(--mono);font-size:8.5px;color:var(--dim)}
+.palette button.active .p-count{color:var(--accent)} .runs{flex:1;overflow:auto;padding:6px 8px 10px;min-height:80px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.run{width:100%;display:block;text-align:left;padding:9px 10px 9px 12px;border-left:2px solid transparent;border-radius:2px;transition:.14s ease} .run:hover{background:rgba(231,237,241,.025)}
+.run.active{background:#0E141C;border-left-color:var(--accent)} .run-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.run-id{font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .run.active .run-id{color:var(--accent)}
+.run-state{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:7.5px;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;flex:none} .run-meta{display:block;margin-top:5px;font-family:var(--mono);font-size:8px;letter-spacing:.05em;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--dim);display:inline-block;flex:none} .dot.ok{background:var(--accent)} .dot.error{background:var(--red)} .dot.skipped{background:var(--dim)} .dot.running{background:var(--amber)}
+.empty{padding:24px 14px;font-family:var(--mono);font-size:8.5px;line-height:1.8;letter-spacing:.12em;color:var(--dim);text-transform:uppercase} .rail-note{flex:none;border-top:1px solid var(--line);padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px}
+.rail-note p{font-size:10.5px;line-height:1.55;color:var(--muted)} .rail-note .zh{font-size:10px;color:var(--dim);letter-spacing:.04em}
+.meter{height:1px;background:var(--line);margin-top:4px;position:relative} .meter i{position:absolute;inset:0 auto 0 0;width:62%;background:var(--accent);opacity:.65}
+.canvas-pane{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--bg)} .canvas-head{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 18px;border-bottom:1px solid var(--line);background:rgba(10,14,20,.5)}
+.canvas-head>div:first-child{display:flex;align-items:baseline;gap:12px;min-width:0} .canvas-title{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zoom{display:flex;align-items:center;gap:0;flex:none} .zoom button{width:26px;height:26px;border:1px solid var(--line);border-left:0;font-family:var(--mono);font-size:10px;color:var(--dim);display:grid;place-items:center;transition:.14s}
+.zoom button:first-child{border-left:1px solid var(--line)} .zoom button:hover{color:var(--accent);background:rgba(126,231,208,.04)}
+.zoom button[data-zoom="0"]{width:34px;font-size:8px;letter-spacing:.1em} #zoomLabel{min-width:42px;text-align:center;font-family:var(--mono);font-size:8.5px;color:var(--dim);border:1px solid var(--line);border-left:0;height:26px;line-height:25px}
+.canvas{position:relative;flex:1;min-height:0;overflow:hidden;background:radial-gradient(720px 440px at 72% -8%,rgba(126,231,208,.055),transparent 65%),radial-gradient(560px 520px at 4% 106%,rgba(143,184,255,.04),transparent 62%),var(--bg)} .canvas::before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(231,237,241,.10) .6px,transparent .6px);background-size:22px 22px;opacity:.55;mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.35))}
+.canvas::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 90px rgba(8,11,16,.55);pointer-events:none} #graph{position:absolute;inset:0;width:100%;height:100%;padding:8px 18px 20px;transform-origin:50% 50%;transition:transform .25s ease;z-index:1}
+.canvas-foot{position:absolute;left:18px;right:18px;bottom:10px;display:flex;justify-content:space-between;align-items:center;z-index:2;pointer-events:none} .canvas-foot .micro{color:var(--dim);font-size:8px}
+.replay-line{position:absolute;top:0;left:0;right:0;height:1px;z-index:3;background:var(--line)} .replay-line i{display:block;height:100%;width:0;background:var(--accent);opacity:.8;transition:width .25s ease}
+body.playing #liveState{color:var(--accent)} body.playing #liveState::before{content:"●";font-size:6px;margin-right:6px;vertical-align:1px;animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}} .inspector{flex:1;overflow:auto;padding:18px;scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.run-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px} .status-pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:4px 8px;border-radius:2px}
+.status-pill.ok,.status-pill.completed,.status-pill.replayed{color:var(--accent);border-color:rgba(126,231,208,.25);background:rgba(126,231,208,.05)} .status-pill.failed,.status-pill.error{color:var(--red);border-color:rgba(255,143,143,.25)}
+.run-time{font-family:var(--mono);font-size:8px;letter-spacing:.08em;color:var(--dim)} .metrics{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-right:0;border-bottom:0;margin-bottom:22px}
+.metric{padding:11px 12px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0} .metric span{display:block;font-family:var(--mono);font-size:7.5px;letter-spacing:.17em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+.metric b{display:block;font-family:var(--mono);font-size:19px;font-weight:300;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .metric b em{font-style:normal;font-size:9px;color:var(--dim);letter-spacing:.08em;margin-left:3px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid var(--line)} .section-head .micro{font-size:7.5px;color:var(--dim)}
+.trace{padding:6px 0 4px} .trow{width:100%;display:grid;grid-template-columns:6px minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:7px 6px;border-radius:2px;text-align:left;color:var(--muted);transition:.12s}
+.trow:hover{background:rgba(231,237,241,.025);color:var(--ink)} .trow.active{background:rgba(126,231,208,.055);color:var(--ink)}
+.trow.live{background:rgba(126,231,208,.09)} .t-name{font-size:11px;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-kind{font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)} .t-lat{font-family:var(--mono);font-size:8.5px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+.trow.active .t-name,.trow.live .t-name{color:var(--accent)} .trow.active .t-lat,.trow.live .t-lat{color:var(--muted)}
+.detail{margin-top:20px;border-top:1px solid var(--line);padding-top:16px} .detail-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.detail h3{font-size:15px;font-weight:450;letter-spacing:.01em;margin-top:12px} .detail-id{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--dim);margin-top:5px}
+.chips{display:flex;gap:6px;margin-top:12px} .chip{font-family:var(--mono);font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:3px 7px;border-radius:2px}
+.config{margin-top:12px;padding:10px 11px;background:#090D12;border:1px solid var(--line);border-radius:2px;font-family:var(--mono);font-size:8.5px;line-height:1.7;color:var(--muted);overflow:auto;max-height:132px;white-space:pre-wrap;word-break:break-word} .step-output{margin-top:10px;padding-left:10px;border-left:1px solid rgba(126,231,208,.32);font-size:10.5px;line-height:1.55;color:var(--muted)}
+footer{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding:0 18px;border-top:1px solid var(--line);background:var(--bg2);font-family:var(--mono);font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden} footer .left{justify-self:start;display:flex;align-items:center;gap:8px}
+footer .mid{justify-self:center;color:var(--dim)} footer .right{justify-self:end;color:var(--muted)}
+.status-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(126,231,208,.5)} body.offline .status-dot{background:var(--amber);box-shadow:none}
+.gnode{cursor:pointer} .gnode .node-bg{fill:#0C1219;stroke:rgba(231,237,241,.14);stroke-width:1;transition:.15s}
+.gnode:hover .node-bg{stroke:rgba(126,231,208,.5)} .gnode.is-active .node-bg{stroke:var(--accent);fill:#0E161C}
+.gnode.is-live .node-bg{stroke:var(--accent);filter:url(#softGlow)} .gnode.is-dim{opacity:.22}
+.gnode .node-kind{font-family:var(--mono);font-size:7.5px;letter-spacing:.16em;fill:var(--muted);text-transform:uppercase} .gnode .node-label{font-family:var(--sans);font-size:12.5px;fill:var(--ink);letter-spacing:.01em}
+.gnode .node-step{font-family:var(--mono);font-size:8px;fill:var(--dim);letter-spacing:.08em} .gnode.is-active .node-label{fill:var(--accent)}
+.gnode.is-active .node-kind,.gnode.is-active .node-step{fill:rgba(126,231,208,.62)} .gedge{fill:none;stroke:rgba(231,237,241,.17);stroke-width:1;transition:.15s}
+.gedge.is-active{stroke:rgba(126,231,208,.55)} .gedge.is-dim{opacity:.15}
+@media(max-width:1180px){ main{grid-template-columns:210px minmax(0,1fr) 320px}
+.rail-note{display:none} .flow-meta{display:none}
+} @media(max-width:900px){
+main{grid-template-columns:190px minmax(0,1fr) 288px} .pill{display:none}
+.inspector{padding:14px} }
+@media(max-width:760px){ body{overflow:auto}
+.app{height:auto;min-height:100dvh;grid-template-rows:64px auto 34px} main{grid-template-columns:1fr;grid-template-rows:420px auto auto}
+.left{order:2;border-right:0;border-top:1px solid var(--line)} .right{order:3;border-left:0;border-top:1px solid var(--line);min-height:520px}
+.canvas-pane{order:1} .runs{max-height:220px}
+.flow-meta{display:none} }
+@media(prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 26 26" aria-hidden="true"><path d="M13 2.2 23.8 13 13 23.8 2.2 13Z" fill="none" stroke="currentColor" stroke-width="1"/><path d="M13 8v10M8 13h10" stroke="currentColor" stroke-width="1" opacity=".45"/><circle cx="13" cy="13" r="1.4" fill="currentColor"/></svg>
+      <div class="wordmark"><b>OBSERVATORY</b><span>WORKBENCH</span></div>
+      <span class="slash">/</span>
+      <div class="product"><b>STUDIO</b><span>VISUAL WORKBENCH</span></div>
+    </div>
+    <div class="flow-meta">
+      <span class="eyebrow">FLOW / ACTIVE</span>
+      <span id="flowName">Research Agent</span>
+      <span id="flowCounts">7 nodes · 8 edges</span>
+    </div>
+    <div class="actions">
+      <span class="pill" id="connState"><i class="dot"></i><span>LOCAL API</span></span>
+      <button class="btn ghost" id="replayBtn" title="Replay the selected run">Replay</button>
+      <button class="btn primary" id="runBtn"><span id="runLabel">Run flow</span></button>
+    </div>
+  </header>
+  <main>
+    <aside class="left">
+      <div class="pane-head"><span class="eyebrow">Node Palette</span><span class="count" id="paletteCount">07</span></div>
+      <div class="palette" id="palette"></div>
+      <div class="pane-head"><span class="eyebrow">Replays</span><span class="count" id="runCount">00</span></div>
+      <div class="runs" id="runs"></div>
+      <div class="rail-note">
+        <span class="eyebrow">Engine</span>
+        <p>Deterministic simulation and replay. Pure Python stdlib, loopback only.</p>
+        <p class="zh">可视化 Agent / RAG 工作台</p>
+        <div class="meter"><i></i></div>
+        <span class="micro" style="font-size:7px;color:var(--dim)">STDLIB / PYTHON 3.10+</span>
+      </div>
+    </aside>
+    <section class="canvas-pane">
+      <div class="canvas-head">
+        <div><span class="eyebrow">Canvas / Topology</span><span class="canvas-title" id="canvasTitle">research-agent</span></div>
+        <div class="zoom" aria-label="Canvas zoom">
+          <button data-zoom="-" aria-label="Zoom out">−</button><span id="zoomLabel">100%</span><button data-zoom="+" aria-label="Zoom in">+</button><button data-zoom="0" aria-label="Fit canvas">FIT</button>
+        </div>
+      </div>
+      <div class="canvas" id="canvas">
+        <div class="replay-line"><i id="replayProgress"></i></div>
+        <svg id="graph" viewBox="0 0 640 740" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Agent flow graph"></svg>
+        <div class="canvas-foot"><span class="micro">LAYOUT / DAG</span><span class="micro" id="liveState">READY</span></div>
+      </div>
+    </section>
+    <aside class="right">
+      <div class="pane-head"><span class="eyebrow">Inspector</span><span class="run-id micro" id="runId">—</span></div>
+      <div class="inspector" id="inspector"></div>
+    </aside>
+  </main>
+  <footer>
+    <span class="left"><i class="status-dot"></i> LOCAL ENGINE / DETERMINISTIC</span>
+    <span class="mid">GET /api/flows · POST /api/runs · POST /api/replay</span>
+    <span class="right" id="endpoint">127.0.0.1:8787</span>
+  </footer>
+</div>
+<script>
+const KINDS=[
+  ["input","Input"],["retriever","Retriever"],["router","Router"],["tool","Tool"],
+  ["agent","Agent"],["judge","Judge"],["memory","Memory"],["output","Output"]
+];
+const COLOR={input:"#8C97A3",retriever:"#8FB8FF",router:"#E8C27E",tool:"#B9A6FF",agent:"#7EE7D0",judge:"#FF8F8F",memory:"#7FB2A6",output:"#E7EDF1"};
+const node=(id,kind,label,config)=>({id,kind,label,config});
+const DEMO_FLOW={id:"research-agent",name:"Research Agent",nodes:[
+  node("intake","input","Intake",{input:"question",latency_ms:84}),
+  node("retrieve","retriever","Hybrid Retrieval",{strategy:"graph+bm25",k:8,latency_ms:412}),
+  node("route","router","Route Plan",{branches:["retrieve","tools"],latency_ms:236}),
+  node("tools","tool","Tool Calls",{tools:["web_search","calculator"],timeout_ms:8000,latency_ms:908}),
+  node("synthesize","agent","Synthesize",{model:"local-8b",temperature:0.2,latency_ms:470}),
+  node("guardrail","judge","Guardrail",{checks:["citation","policy"],latency_ms:280}),
+  node("reply","output","Reply",{format:"markdown",latency_ms:210})
+],edges:[
+  {source:"intake",target:"retrieve",label:"query"},{source:"intake",target:"route",label:"query"},
+  {source:"retrieve",target:"synthesize",label:"evidence"},{source:"route",target:"tools",label:"plan"},
+  {source:"route",target:"synthesize",label:"plan"},{source:"tools",target:"synthesize",label:"observations"},
+  {source:"synthesize",target:"guardrail",label:"draft"},{source:"guardrail",target:"reply",label:"verdict"}
+]};
+const DEMO_STEPS=[
+  ["s01-intake","intake","Intake","input",null,0,84,120,36,"question accepted: compare graph retrieval strategies"],
+  ["s02-retrieve","retrieve","Hybrid Retrieval","retriever","s01-intake",84,412,380,620,"8 passages · 3 sources ranked"],
+  ["s03-route","route","Route Plan","router","s01-intake",84,236,240,120,"branch plan: retrieve + tools"],
+  ["s04-tools","tools","Tool Calls","tool","s03-route",320,908,520,280,"2 tool calls returned · 1 skipped"],
+  ["s05-synthesize","synthesize","Synthesize","agent","s04-tools",1228,470,900,610,"draft composed from retrieved evidence"],
+  ["s06-guardrail","guardrail","Guardrail","judge","s05-synthesize",1698,280,220,40,"citation check passed · policy clear"],
+  ["s07-reply","reply","Reply","output","s06-guardrail",1978,210,90,310,"final answer emitted"]
+].map(s=>({id:s[0],node_id:s[1],label:s[2],kind:s[3],status:"ok",parent:s[4],started_ms:s[5],latency_ms:s[6],tokens_in:s[7],tokens_out:s[8],output:s[9],error:null}));
+const DEMO_RUN={id:"run_7fc21a9d04",flow_id:"research-agent",flow_name:"Research Agent",status:"completed",
+  started_at:"2026-11-06T09:12:04Z",finished_at:"2026-11-06T09:12:06Z",replayed_from:null,steps:DEMO_STEPS,metadata:{mode:"recorded"}};
+const state={flow:null,flows:[],runs:[],run:null,node:null,kind:null,zoom:1,offline:false,loading:false,live:null,timers:[]};
+const $=id=>document.getElementById(id);
+const esc=value=>String(value).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtMs=ms=>ms>=1000?(ms/1000).toFixed(2)+"s":Math.round(ms)+"ms";
+const fmt=n=>Number(n||0).toLocaleString("en-US");
+const shortId=id=>String(id||"").replace(/^run_/,"").toUpperCase();
+const stepFor=nodeId=>state.run?.steps.find(s=>s.node_id===nodeId)||null;
+const stepIds=run=>new Set((run?.steps||[]).map(s=>s.id));
+function playable(run){return !!(run&&run.steps&&run.steps.length)}
+async function getJSON(path){const r=await fetch(path,{headers:{Accept:"application/json"}});if(!r.ok)throw new Error(r.status+" "+r.statusText);return r.json()}
+async function postJSON(path,body){const r=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||r.status);return data}
+function topoOrder(flow){
+  const ids=flow.nodes.map(n=>n.id), indeg=Object.fromEntries(ids.map(id=>[id,0]));
+  flow.edges.forEach(e=>{if(indeg[e.target]!==undefined)indeg[e.target]++});
+  const queue=ids.filter(id=>!indeg[id]), order=[];
+  while(queue.length){const id=queue.shift();order.push(id);flow.edges.filter(e=>e.source===id).forEach(e=>{if(--indeg[e.target]===0)queue.push(e.target)})}
+  return order.length===ids.length?order:ids;
+}
+function layout(flow){
+  const order=topoOrder(flow), level={};
+  order.forEach(id=>{
+    const preds=flow.edges.filter(e=>e.target===id).map(e=>e.source);
+    level[id]=preds.length?Math.max(...preds.map(p=>level[p]??0))+1:0;
+  });
+  const maxLevel=Math.max(0,...Object.values(level)), rows={};
+  Object.keys(level).forEach(id=>(rows[level[id]]=rows[level[id]]||[]).push(id));
+  const W=640,NW=214,NH=56,GAP=58,ROWS=28;
+  const count=Math.max(...Object.values(rows).map(r=>r.length),1);
+  const needed=count*NW+(count-1)*ROWS+100;
+  const width=Math.max(W,needed), height=74+(maxLevel+1)*NH+maxLevel*GAP;
+  const positions={};
+  Object.entries(rows).forEach(([lv,ids])=>{
+    const total=ids.length*NW+(ids.length-1)*ROWS, start=(width-total)/2, y=54+Number(lv)*(NH+GAP);
+    ids.forEach((id,i)=>positions[id]={x:start+i*(NW+ROWS),y,index:order.indexOf(id)});
+  });
+  return {positions,width,height,order};
+}
+function renderPalette(){ const counts={};state.flow?.nodes.forEach(n=>counts[n.kind]=(counts[n.kind]||0)+1);
+  $("paletteCount").textContent=String(state.flow?.nodes.length||0).padStart(2,"0");
+  $("palette").innerHTML=KINDS.map(([id,label])=>{
+    const n=counts[id]||0;
+    return `<button data-kind="${id}" class="${state.kind===id?"active":""}" ${n?"":"disabled style=opacity:.35"}>
+      <i class="swatch" style="--c:${COLOR[id]}"></i><span class="p-name">${label}</span><span class="p-count">${String(n).padStart(2,"0")}</span></button>`;
+  }).join("");
+}
+function renderGraph(){
+  if(!state.flow)return;
+  const {positions,width,height}=layout(state.flow);
+  $("graph").setAttribute("viewBox",`0 0 ${width} ${height}`);
+  $("graph").style.transform=`scale(${state.zoom})`;
+  $("zoomLabel").textContent=Math.round(state.zoom*100)+"%";
+  const active=state.live?state.run?.steps.find(s=>s.id===state.live)?.node_id:state.node; const edges=state.flow.edges.map(e=>{
+    const a=positions[e.source],b=positions[e.target];if(!a||!b)return "";
+    const x1=a.x+107,y1=a.y+56,x2=b.x+107,y2=b.y;
+    const dy=Math.max(34,(y2-y1)*.45);
+    const on=active&&(e.source===active||e.target===active);
+    const dim=state.kind&&(state.flow.nodes.find(n=>n.id===e.source)?.kind!==state.kind&&state.flow.nodes.find(n=>n.id===e.target)?.kind!==state.kind);
+    return `<path class="gedge ${on?"is-active":""} ${dim?"is-dim":""}" d="M${x1},${y1} C${x1},${y1+dy} ${x2},${y2-dy} ${x2},${y2-9}" marker-end="url(#${on?"arrowHot":"arrow"})"/>`;
+  }).join("");
+  const nodes=state.flow.nodes.map(n=>{
+    const p=positions[n.id],step=stepFor(n.id);
+    const dim=state.kind&&n.kind!==state.kind;
+    const on=active===n.id;
+    const live=state.live&&step&&state.live===step.id;
+    return `<g class="gnode ${on?"is-active":""} ${live?"is-live":""} ${dim?"is-dim":""}" data-node="${n.id}" transform="translate(${p.x},${p.y})" tabindex="0" role="button" aria-label="${esc(n.label)}">
+      <rect class="node-bg" width="214" height="56" rx="5"/>
+      <circle cx="15" cy="18" r="2.6" fill="${COLOR[n.kind]||"#8C97A3"}"/>
+      <text class="node-kind" x="24" y="21">${esc(n.kind)}</text>
+      <text class="node-step" x="200" y="21" text-anchor="end">${String(p.index+1).padStart(2,"0")}</text>
+      <text class="node-label" x="14" y="42">${esc(n.label)}</text>
+      ${step?`<circle cx="200" cy="41" r="2" fill="${step.status==="ok"?"#7EE7D0":step.status==="error"?"#FF8F8F":"#4C5762"}"/>`:""}
+    </g>`;
+  }).join("");
+  $("graph").innerHTML=`<defs>
+    <filter id="softGlow" x="-30%" y="-40%" width="160%" height="180%"><feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="#7EE7D0" flood-opacity=".32"/></filter>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 1 6 4 0 7" fill="none" stroke="rgba(231,237,241,.30)" stroke-width="1"/></marker>
+    <marker id="arrowHot" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 1 6 4 0 7" fill="none" stroke="rgba(126,231,208,.8)" stroke-width="1"/></marker>
+  </defs>${edges}${nodes}`;
+}
+function renderRuns(){ $("runCount").textContent=String(state.runs.length).padStart(2,"0");
+  if(!state.runs.length){$("runs").innerHTML='<div class="empty">No runs yet<br>Press run flow to record one.</div>';return}
+  $("runs").innerHTML=state.runs.map(run=>{
+    const active=state.run&&run.id===state.run.id;
+    const status=(run.status||"completed").toLowerCase();
+    const replay=run.replayed_from?" · REPLAY":"";
+    return `<button class="run ${active?"active":""}" data-run="${run.id}">
+      <span class="run-top"><span class="run-id">RUN ${shortId(run.id)}</span><span class="run-state"><i class="dot ${status==="completed"||status==="replayed"?"ok":status}"></i>${status}</span></span>
+      <span class="run-meta">${run.steps.length} steps · ${fmtMs(Math.max(0,...run.steps.map(s=>s.started_ms+s.latency_ms)))}${replay}</span>
+    </button>`;
+  }).join("");
+}
+function traceRows(run){
+  const map=new Map(run.steps.map(s=>[s.id,{step:s,children:[],depth:0}]));
+  const byNode=new Map();run.steps.forEach(s=>{if(!byNode.has(s.node_id))byNode.set(s.node_id,map.get(s.id))});
+  const roots=[],parentOf=new Map();
+  run.steps.forEach(s=>{
+    const cur=map.get(s.id);let parent=s.parent?map.get(s.parent)||byNode.get(s.parent):null;
+    if(!parent||parent===cur){roots.push(cur);return}
+    let cursor=parent,cycle=false;
+    while(cursor){if(cursor===cur){cycle=true;break}cursor=parentOf.get(cursor)}
+    if(cycle){roots.push(cur);return}
+    parent.children.push(cur);parentOf.set(cur,parent);
+  });
+  const assign=(n,d)=>{n.depth=d;n.children.forEach(c=>assign(c,d+1))};roots.forEach(r=>assign(r,0));
+  const rows=[];const walk=ns=>ns.forEach(n=>{rows.push(n);walk(n.children)});walk(roots);
+  return rows;
+}
+function renderInspector(){ const run=state.run, shell=$("inspector");
+  const scroll=shell.scrollTop;
+  if(!run){
+    $("runId").textContent="—";
+    shell.innerHTML='<div class="empty" style="padding:32px 4px;line-height:2">No run selected.<br>Record a run to inspect its trace tree, step latency and token spend.</div>';
+    return;
+  }
+  $("runId").textContent="RUN "+shortId(run.id);
+  const duration=Math.max(0,...run.steps.map(s=>s.started_ms+s.latency_ms));
+  const tokens=run.steps.reduce((sum,s)=>sum+(s.tokens_in||0)+(s.tokens_out||0),0);
+  const ok=run.steps.filter(s=>s.status==="ok").length;
+  const status=(run.status||"completed").toLowerCase();
+  const stamp=(run.started_at||"").replace("T"," ").replace("Z"," UTC").slice(0,23);
+  const rows=traceRows(run);
+  const selected=state.node;
+  $("inspector").innerHTML=`
+    <div class="run-head"><span class="status-pill ${esc(status)}"><i class="dot ${status==="completed"||status==="replayed"?"ok":status}"></i>${esc(status)}</span><span class="run-time">${esc(stamp)}</span></div>
+    <div class="metrics">
+      <div class="metric"><span>Steps</span><b>${String(run.steps.length).padStart(2,"0")}</b></div>
+      <div class="metric"><span>Wall time</span><b>${fmtMs(duration)}</b></div>
+      <div class="metric"><span>Tokens</span><b>${fmt(tokens)}<em>tok</em></b></div>
+      <div class="metric"><span>Healthy</span><b>${ok}<em>/ ${run.steps.length}</em></b></div>
+    </div>
+    <div class="section-head"><span class="eyebrow">Trace tree</span><span class="micro">${rows.length} STEPS / ${rows.filter(r=>!r.depth).length} ROOTS</span></div>
+    <div class="trace">${rows.map(({step,depth})=>{
+      const active=selected===step.node_id, live=state.live===step.id;
+      return `<button class="trow ${active?"active":""} ${live?"live":""}" data-node="${step.node_id}" style="padding-left:${6+depth*13}px">
+        <i class="dot ${step.status}"></i><span class="t-name">${esc(step.label)}</span><span class="t-kind">${esc(step.kind)}</span><span class="t-lat">${fmtMs(step.latency_ms)}</span></button>`;
+    }).join("")}</div>
+    ${detailHTML()}`;
+  shell.scrollTop=scroll;
+}
+function detailHTML(){
+  const node=state.flow?.nodes.find(n=>n.id===state.node);
+  if(!node)return '<div class="detail"><span class="eyebrow">Selected node</span><p class="step-output" style="border:0;padding:0;margin-top:12px;color:var(--dim)">Select a node on the canvas.</p></div>';
+  const step=stepFor(node.id);
+  return `<div class="detail">
+    <div class="detail-head"><span class="eyebrow">Selected node</span><span class="micro">${step?esc(step.status):"NOT IN RUN"}</span></div>
+    <h3>${esc(node.label)}</h3><p class="detail-id">${esc(node.id)} / ${esc(node.kind)}</p>
+    <div class="chips"><span class="chip" style="color:${COLOR[node.kind]||"#8C97A3"}">${esc(node.kind)}</span>${step?`<span class="chip">${fmtMs(step.latency_ms)}</span><span class="chip">${fmt(step.tokens_in+step.tokens_out)} tok</span>`:""}</div>
+    <pre class="config">${esc(JSON.stringify(node.config||{},null,2))}</pre>
+    ${step?.output?`<p class="step-output">${esc(step.output)}</p>`:""}
+  </div>`;
+}
+function renderAll(){
+  const flow=state.flow;
+  if(!flow)return;
+  $("flowName").textContent=flow.name||flow.id;
+  $("flowCounts").textContent=`${flow.nodes.length} nodes · ${flow.edges.length} edges`;
+  $("canvasTitle").textContent=flow.id;
+  renderPalette();renderGraph();renderRuns();renderInspector();
+  $("replayBtn").disabled=!playable(state.run);
+}
+function selectNode(id,keepPlay=false){ if(!keepPlay)stopPlayback();
+  state.node=id;renderGraph();renderInspector();
+}
+function selectRun(run){
+  stopPlayback();state.run=run;state.node=run.steps.reduce((best,s)=>s.latency_ms>(best?.latency_ms??-1)?s:best,null)?.node_id||null;
+  renderRuns();renderGraph();renderInspector();$("replayBtn").disabled=!playable(run);
+}
+function stopPlayback(){
+  state.timers.forEach(clearTimeout);state.timers=[];state.live=null;
+  document.body.classList.remove("playing");$("replayProgress").style.width="0";$("liveState").textContent="READY";
+}
+function play(run){
+  stopPlayback();
+  if(!playable(run))return;
+  document.body.classList.add("playing");
+  run.steps.forEach((step,i)=>{
+    const timer=setTimeout(()=>{
+      state.live=step.id;state.node=step.node_id;
+      $("replayProgress").style.width=((i+1)/run.steps.length*100)+"%";
+      $("liveState").textContent=`REPLAY ${String(i+1).padStart(2,"0")} / ${String(run.steps.length).padStart(2,"0")}`;
+      renderGraph();renderInspector();
+      if(i===run.steps.length-1)state.timers.push(setTimeout(()=>{
+        state.live=null;document.body.classList.remove("playing");
+        $("liveState").textContent="COMPLETE";renderGraph();renderInspector();
+      },700));
+    },300*i);
+    state.timers.push(timer);
+  });
+}
+function localRun(){
+  return {...DEMO_RUN,id:"run_"+Date.now().toString(36),started_at:new Date().toISOString(),finished_at:null,
+    replayed_from:null,steps:DEMO_RUN.steps.map(s=>({...s}))};
+}
+async function runFlow(){
+  if(state.loading)return;
+  state.loading=true;$("liveState").style.color="";$("runLabel").textContent="Running";$("runBtn").disabled=true;
+  try{
+    let run;
+    if(state.offline){run=localRun()}
+    else{const data=await postJSON("/api/runs",{flow_id:state.flow.id});run=data.run;state.runs=[run,...state.runs.filter(r=>r.id!==run.id)]}
+    if(state.offline){state.runs=[run,...state.runs]}
+    state.run=run;state.node=null;renderRuns();renderGraph();renderInspector();$("replayBtn").disabled=false;
+    play(run);
+  }catch(err){$("liveState").textContent="RUN FAILED";$("liveState").style.color="var(--red)"}
+  finally{state.loading=false;$("runLabel").textContent="Run flow";$("runBtn").disabled=false}
+}
+async function replayFlow(){
+  if(state.loading||!playable(state.run))return;
+  state.loading=true;$("replayBtn").disabled=true;
+  try{
+    let run;
+    if(state.offline){
+      run={...state.run,id:"run_"+Date.now().toString(36),status:"replayed",replayed_from:state.run.id,
+        started_at:new Date().toISOString(),steps:state.run.steps.map(s=>({...s}))};
+      state.runs=[run,...state.runs];
+    }else{
+      const data=await postJSON("/api/replay",{run_id:state.run.id});run=data.run;
+      state.runs=[run,...state.runs.filter(r=>r.id!==run.id)];
+    }
+    state.run=run;renderRuns();renderGraph();renderInspector();play(run);
+  }catch(err){$("liveState").textContent="REPLAY FAILED"}
+  finally{state.loading=false;$("replayBtn").disabled=!playable(state.run)}
+}
+function hydrate(flows,runs,offline){
+  state.offline=!!offline;state.flows=flows;
+  state.flow=flows[0]||DEMO_FLOW;state.runs=runs||[];
+  state.run=state.runs[0]||null;state.node=null;
+  document.body.classList.toggle("offline",state.offline);
+  const pill=$("connState");pill.classList.toggle("offline",state.offline);
+  pill.innerHTML=`<i class="dot"></i><span>${state.offline?"DEMO MODE":"LOCAL API"}</span>`;
+  $("endpoint").textContent=state.offline?"STATIC / DEMO DATA":(location.host||"127.0.0.1:8787");
+  if(state.run)state.node=state.run.steps.reduce((best,s)=>s.latency_ms>(best?.latency_ms??-1)?s:best,null)?.node_id||null;
+  renderAll();
+}
+async function boot(){
+  hydrate([DEMO_FLOW],[DEMO_RUN],true);
+  try{
+    const [flows,runs]=await Promise.all([getJSON("/api/flows"),getJSON("/api/runs")]);
+    if(!flows.flows?.length)throw new Error("no flows");
+    hydrate(flows.flows,runs.runs||[],false);
+  }catch(err){hydrate([DEMO_FLOW],[DEMO_RUN],true)}
+}
+$("palette").addEventListener("click",event=>{
+  const button=event.target.closest("[data-kind]");if(!button||button.disabled)return;
+  state.kind=state.kind===button.dataset.kind?null:button.dataset.kind;
+  renderPalette();renderGraph();
+});
+$("runs").addEventListener("click",event=>{const button=event.target.closest("[data-run]");if(button)selectRun(state.runs.find(r=>r.id===button.dataset.run))});
+$("graph").addEventListener("click",event=>{const group=event.target.closest("[data-node]");if(group)selectNode(group.dataset.node)});
+$("graph").addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){const group=event.target.closest("[data-node]");if(group){event.preventDefault();selectNode(group.dataset.node)}}});
+$("inspector").addEventListener("click",event=>{const row=event.target.closest("[data-node]");if(row)selectNode(row.dataset.node)});
+$("runBtn").addEventListener("click",runFlow);
+$("replayBtn").addEventListener("click",replayFlow);
+document.querySelector(".zoom").addEventListener("click",event=>{
+  const button=event.target.closest("button");if(!button)return;
+  const action=button.dataset.zoom;
+  state.zoom=action==="+"?Math.min(1.5,state.zoom+.1):action==="-"?Math.max(.6,state.zoom-.1):1;
+  renderGraph();
+});
+document.addEventListener("keydown",event=>{if(event.key==="Escape"){state.kind=null;renderPalette();renderGraph()}});
+boot();
+</script>
+</body>
+</html>
