@@ -1,0 +1,82 @@
+{
+  "id": "research-agent",
+  "name": "Research Agent",
+  "nodes": [
+    {
+      "id": "intake",
+      "kind": "input",
+      "label": "Intake",
+      "config": {
+        "input": "question",
+        "latency_ms": 84
+      }
+    },
+    {
+      "id": "retrieve",
+      "kind": "retriever",
+      "label": "Hybrid Retrieval",
+      "config": {
+        "strategy": "graph+bm25",
+        "k": 8,
+        "latency_ms": 412
+      }
+    },
+    {
+      "id": "route",
+      "kind": "router",
+      "label": "Route Plan",
+      "config": {
+        "branches": ["retrieve", "tools"],
+        "latency_ms": 236
+      }
+    },
+    {
+      "id": "tools",
+      "kind": "tool",
+      "label": "Tool Calls",
+      "config": {
+        "tools": ["web_search", "calculator"],
+        "timeout_ms": 8000,
+        "latency_ms": 908
+      }
+    },
+    {
+      "id": "synthesize",
+      "kind": "agent",
+      "label": "Synthesize",
+      "config": {
+        "model": "local-8b",
+        "temperature": 0.2,
+        "latency_ms": 470
+      }
+    },
+    {
+      "id": "guardrail",
+      "kind": "judge",
+      "label": "Guardrail",
+      "config": {
+        "checks": ["citation", "policy"],
+        "latency_ms": 280
+      }
+    },
+    {
+      "id": "reply",
+      "kind": "output",
+      "label": "Reply",
+      "config": {
+        "format": "markdown",
+        "latency_ms": 210
+      }
+    }
+  ],
+  "edges": [
+    { "source": "intake", "target": "retrieve", "label": "query" },
+    { "source": "intake", "target": "route", "label": "query" },
+    { "source": "retrieve", "target": "synthesize", "label": "evidence" },
+    { "source": "route", "target": "tools", "label": "plan" },
+    { "source": "route", "target": "synthesize", "label": "plan" },
+    { "source": "tools", "target": "synthesize", "label": "observations" },
+    { "source": "synthesize", "target": "guardrail", "label": "draft" },
+    { "source": "guardrail", "target": "reply", "label": "verdict" }
+  ]
+}
