@@ -1,0 +1,113 @@
+{
+  "id": "run_7fc21a9d04",
+  "flow_id": "research-agent",
+  "flow_name": "Research Agent",
+  "status": "completed",
+  "started_at": "2026-11-06T09:12:04Z",
+  "finished_at": "2026-11-06T09:12:06Z",
+  "replayed_from": null,
+  "steps": [
+    {
+      "id": "s01-intake",
+      "node_id": "intake",
+      "label": "Intake",
+      "kind": "input",
+      "status": "ok",
+      "parent": null,
+      "started_ms": 0,
+      "latency_ms": 84,
+      "tokens_in": 120,
+      "tokens_out": 36,
+      "output": "question accepted: compare graph retrieval strategies",
+      "error": null
+    },
+    {
+      "id": "s02-retrieve",
+      "node_id": "retrieve",
+      "label": "Hybrid Retrieval",
+      "kind": "retriever",
+      "status": "ok",
+      "parent": "s01-intake",
+      "started_ms": 84,
+      "latency_ms": 412,
+      "tokens_in": 380,
+      "tokens_out": 620,
+      "output": "8 passages · 3 sources ranked",
+      "error": null
+    },
+    {
+      "id": "s03-route",
+      "node_id": "route",
+      "label": "Route Plan",
+      "kind": "router",
+      "status": "ok",
+      "parent": "s01-intake",
+      "started_ms": 84,
+      "latency_ms": 236,
+      "tokens_in": 240,
+      "tokens_out": 120,
+      "output": "branch plan: retrieve + tools",
+      "error": null
+    },
+    {
+      "id": "s04-tools",
+      "node_id": "tools",
+      "label": "Tool Calls",
+      "kind": "tool",
+      "status": "ok",
+      "parent": "s03-route",
+      "started_ms": 320,
+      "latency_ms": 908,
+      "tokens_in": 520,
+      "tokens_out": 280,
+      "output": "2 tool calls returned · 1 skipped",
+      "error": null
+    },
+    {
+      "id": "s05-synthesize",
+      "node_id": "synthesize",
+      "label": "Synthesize",
+      "kind": "agent",
+      "status": "ok",
+      "parent": "s04-tools",
+      "started_ms": 1228,
+      "latency_ms": 470,
+      "tokens_in": 900,
+      "tokens_out": 610,
+      "output": "draft composed from retrieved evidence",
+      "error": null
+    },
+    {
+      "id": "s06-guardrail",
+      "node_id": "guardrail",
+      "label": "Guardrail",
+      "kind": "judge",
+      "status": "ok",
+      "parent": "s05-synthesize",
+      "started_ms": 1698,
+      "latency_ms": 280,
+      "tokens_in": 220,
+      "tokens_out": 40,
+      "output": "citation check passed · policy clear",
+      "error": null
+    },
+    {
+      "id": "s07-reply",
+      "node_id": "reply",
+      "label": "Reply",
+      "kind": "output",
+      "status": "ok",
+      "parent": "s06-guardrail",
+      "started_ms": 1978,
+      "latency_ms": 210,
+      "tokens_in": 90,
+      "tokens_out": 310,
+      "output": "final answer emitted",
+      "error": null
+    }
+  ],
+  "metadata": {
+    "mode": "recorded",
+    "env": "local"
+  }
+}
