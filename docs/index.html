@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="data:image/svg+xml,%3Csvg viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23121011'/%3E%3Cpath d='M16 5 27 16 16 27 5 16Z' fill='none' stroke='%23#FF5A36'/%3E%3Ccircle cx='16' cy='16' r='1.6' fill='%23#FF5A36'/%3E%3C/svg%3E">
+<title>Observatory — Visual Workbench</title>
+<style>
+  :root{--bg:#121011;--bg2:#0B1017;--ink:#E7EDF1;--muted:#7A8691;--dim:#4C5762;--line:rgba(231,237,241,.10);--accent:#FF5A36;--blue:#8FB8FF;--violet:#F2C14E;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,"Liberation Mono",monospace}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.65;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(rgba(231,237,241,.055) .6px,transparent .6px);background-size:26px 26px}
+  a{color:inherit;text-decoration:none}
+  img{display:block;max-width:100%}
+  ::selection{background:rgba(126,231,208,.25)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 32px}
+  .mono{font-family:var(--mono);text-transform:uppercase;letter-spacing:.18em;font-size:9px;color:var(--muted)}
+  .accent{color:var(--accent)}
+
+  header.site{border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(8,11,16,.9);backdrop-filter:blur(12px);z-index:5}
+  .bar{height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .brand{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.26em;text-transform:uppercase}
+  .brand span{color:var(--dim);margin:0 8px;font-weight:400}
+  nav{display:flex;align-items:center;gap:26px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  nav a:hover{color:var(--accent)}
+  nav .tag{border:1px solid var(--line);padding:5px 9px;color:var(--dim);font-size:8px}
+
+  .hero{padding-top:56px;padding-bottom:72px}
+  .hero-label{display:flex;justify-content:space-between;gap:20px;padding-bottom:14px}
+  .hero-label .mono{font-size:8px}
+  .hero-frame{border:1px solid var(--line);background:var(--bg2);border-radius:2px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.28)}
+  .hero-frame img{width:100%;height:auto;border-bottom:1px solid var(--line)}
+  .hero-frame figcaption{display:flex;justify-content:space-between;gap:20px;padding:11px 16px;font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .hero-copy{display:grid;grid-template-columns:1.35fr .65fr;gap:64px;align-items:end;margin-top:44px}
+  h1{font-size:clamp(38px,5vw,58px);line-height:1.02;letter-spacing:-.025em;font-weight:250}
+  h1 em{font-style:normal;color:var(--accent)}
+  .zh{font-size:13px;color:var(--muted);margin-top:16px;letter-spacing:.03em}
+  .hero-side p{font-size:13px;line-height:1.75;color:var(--muted);max-width:34ch}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .btn{display:inline-flex;align-items:center;gap:9px;height:40px;padding:0 18px;border:1px solid var(--line);border-radius:2px;
+    font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;transition:.18s}
+  .btn::after{content:"→";font-size:12px;font-weight:400;transition:transform .18s}
+  .btn:hover{border-color:rgba(126,231,208,.5);color:var(--accent)}
+  .btn:hover::after{transform:translateX(3px)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#04110E}
+  .btn.primary:hover{background:#9AF0DE;color:#04110E;box-shadow:0 0 30px rgba(126,231,208,.16)}
+
+  .section{border-top:1px solid var(--line);padding:76px 0}
+  .sec-head{display:grid;grid-template-columns:52px 1fr auto;gap:20px;align-items:baseline;margin-bottom:38px}
+  .sec-head .idx{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.1em}
+  h2{font-size:clamp(26px,3.4vw,36px);font-weight:300;letter-spacing:-.02em;line-height:1.2}
+  .sec-head .note{font-family:var(--mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);white-space:nowrap}
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+  .card{background:var(--bg);padding:30px 28px 26px;display:flex;flex-direction:column;min-height:250px}
+  .card .num{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim)}
+  .card h3{font-size:20px;font-weight:400;letter-spacing:-.01em;margin:22px 0 10px}
+  .card p{font-size:12.5px;line-height:1.7;color:var(--muted);max-width:32ch}
+  .card .meta{margin-top:auto;padding-top:28px;display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+  .card code{color:var(--accent);font-family:var(--mono)}
+
+  .split{display:grid;grid-template-columns:.85fr 1.15fr;gap:64px;align-items:start}
+  .split .lede{font-size:13px;line-height:1.8;color:var(--muted);max-width:38ch;margin-top:18px}
+  .checks{list-style:none;margin-top:28px;border-top:1px solid var(--line)}
+  .checks li{display:flex;gap:12px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+  .checks li::before{content:"—";color:var(--accent)}
+  .terminal{background:#06090D;border:1px solid var(--line);border-radius:2px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.3)}
+  .term-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;height:38px;padding:0 14px;border-bottom:1px solid var(--line);background:#090D12;font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+  .term-bar .lights{display:flex;gap:5px}
+  .term-bar .lights i{width:6px;height:6px;border-radius:50%;background:var(--dim);display:block;opacity:.55}
+  .term-bar .lights i:first-child{background:var(--accent);opacity:.8}
+  pre{padding:22px 20px;overflow:auto;font-family:var(--mono);font-size:10.5px;line-height:1.95;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+  .prompt{color:var(--accent)}
+  .out{color:var(--dim)}
+  .ok{color:var(--accent)}
+
+  .metrics{border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);margin:0 auto;max-width:1120px}
+  .metric{padding:30px 28px 28px;border-right:1px solid var(--line)}
+  .metric:last-child{border-right:0}
+  .metric b{display:block;font-family:var(--mono);font-size:31px;line-height:1;font-weight:300;letter-spacing:-.04em;color:var(--ink)}
+  .metric span{display:block;margin-top:11px;font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .metric .sub{font-family:var(--sans);font-size:10.5px;line-height:1.5;color:var(--muted);letter-spacing:0;text-transform:none;margin-top:6px}
+
+  footer.site-foot{border-top:1px solid var(--line)}
+  .foot{min-height:92px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding-top:24px;padding-bottom:24px}
+  .foot p{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+  .foot .links{display:flex;gap:18px;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .foot .links a:hover{color:var(--accent)}
+
+  @media(max-width:900px){
+    .hero-copy,.split{grid-template-columns:1fr;gap:32px}
+    .cards{grid-template-columns:1fr}
+    .card{min-height:0}
+    .metrics{grid-template-columns:1fr 1fr}
+    .metric:nth-child(2){border-right:0}
+    .metric:nth-child(-n+2){border-bottom:1px solid var(--line)}
+    nav a:not(.tag){display:none}
+    .sec-head{grid-template-columns:32px 1fr}
+    .sec-head .note{display:none}
+  }
+  @media(max-width:560px){
+    .wrap{padding:0 20px}
+    .hero{padding-top:32px}
+    h1{font-size:38px}
+    .metrics{grid-template-columns:1fr}
+    .metric{border-right:0;border-bottom:1px solid var(--line)}
+    .hero-label{flex-direction:column;gap:6px}
+  }
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body id="top">
+<header class="site">
+  <div class="wrap bar">
+    <a class="brand" href="#top">OBSERVATORY<span>/</span>STUDIO</a>
+    <nav aria-label="Primary">
+      <a href="#capabilities">Capabilities</a>
+      <a href="#quickstart">Quickstart</a>
+      <a href="#measure">Benchmarks</a>
+      <span class="tag">V0.2.0 / ALPHA</span>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="wrap hero">
+    <div class="hero-label">
+      <span class="mono">05 / Visual Workbench</span>
+      <span class="mono">Compose · Inspect · Replay</span>
+    </div>
+    <figure class="hero-frame">
+      <img src="../assets/hero-dark.svg" alt="Observatory — Compose, inspect, and replay agent runs." width="1280" height="400">
+      <figcaption><span>Fig. 01 — Observatory, 2026</span><span>Canvas / Runs / Inspector</span></figcaption>
+    </figure>
+    <div class="hero-copy">
+      <div>
+        <h1>Compose, inspect, and replay <em>agent runs.</em></h1>
+        <p class="zh">可视化 Agent / RAG 工作台</p>
+      </div>
+      <div class="hero-side">
+        <p>A local workbench for the shape of a run: a validated flow graph, a trace you can read, and a replay you can diff. Standard library only.</p>
+        <div class="actions">
+          <a class="btn primary" href="#quickstart">Quickstart</a>
+          <a class="btn" href="../README.md">Read the README</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap section" id="capabilities">
+    <div class="sec-head"><span class="idx">01</span><h2>Three surfaces, one trace.</h2><span class="note">Graph / Trace / Run</span></div>
+    <div class="cards">
+      <article class="card">
+        <span class="num">01 / Compose</span>
+        <h3>A graph that checks itself.</h3>
+        <p>Nodes carry kind and config; edges carry direction. Validate unknown references, cycles, orphan nodes and unreachable components before a run starts.</p>
+        <div class="meta"><code>graph.py</code><span>Validate / Order</span></div>
+      </article>
+      <article class="card">
+        <span class="num">02 / Inspect</span>
+        <h3>Traces that read like trees.</h3>
+        <p>Steps nest through their parent reference. Flatten the forest, surface latency and token spend, and keep a compact text summary beside the canvas.</p>
+        <div class="meta"><code>inspector.py</code><span>Tree / Metrics</span></div>
+      </article>
+      <article class="card">
+        <span class="num">03 / Replay</span>
+        <h3>Deterministic by construction.</h3>
+        <p>Replay re-emits a recorded run under a fresh id. Diff two runs structurally by node, status, latency and output, without a model call in the loop.</p>
+        <div class="meta"><code>runs.py</code><span>Replay / Diff</span></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="wrap section split" id="quickstart">
+    <div>
+      <div class="mono accent" style="margin-bottom:20px">02 / Quickstart</div>
+      <h2>Run it offline<br>in one process.</h2>
+      <p class="lede">Install the package, validate the example flow, and open the workbench. The API binds to loopback; nothing leaves the machine.</p>
+      <ul class="checks">
+        <li>Pure Python, no runtime dependencies</li>
+        <li>Seven-node example flow included</li>
+        <li>JSON API plus single-file UI</li>
+      </ul>
+    </div>
+    <div class="terminal" aria-label="Terminal quickstart">
+      <div class="term-bar"><span class="lights"><i></i><i></i><i></i></span><span>~/observatory</span><span>zsh</span></div>
+      <pre><span class="prompt">$</span> pip install -e .
+<span class="prompt">$</span> python -m observatory validate examples/flow.json
+<span class="out">Research Agent / research-agent</span>
+<span class="out">nodes 7 / edges 8</span>
+<span class="out">order intake → retrieve → route → tools → synthesize → guardrail → reply</span>
+<span class="ok">valid</span>
+
+<span class="prompt">$</span> python -m observatory serve --port 8787
+<span class="out">Observatory ready on loopback:8787</span>
+<span class="out">flows 1 · runs 1</span></pre>
+    </div>
+  </section>
+
+  <div class="metrics" id="measure">
+    <div class="metric"><b>3,741</b><span>Trace builds / s</span><div class="sub">512-step trace forest</div></div>
+    <div class="metric"><b>3,643</b><span>Replays / s</span><div class="sub">256 recorded steps</div></div>
+    <div class="metric"><b>7</b><span>Nodes in the demo flow</span><div class="sub">8 directed edges</div></div>
+    <div class="metric"><b>0</b><span>Runtime dependencies</span><div class="sub">Python 3.10+ standard library</div></div>
+  </div>
+
+  <section class="wrap section" style="padding-top:54px;padding-bottom:54px">
+    <div class="sec-head" style="margin-bottom:18px"><span class="idx">03</span><h2 style="font-size:24px">Measured, not asserted.</h2><span class="note">Apple arm64 / Python 3.14 / Indicative</span></div>
+    <p style="max-width:64ch;margin-left:72px;font-size:12.5px;line-height:1.75;color:var(--muted)">Synthetic single-process workloads, best of three samples. Reproduce with <code style="font-family:var(--mono);font-size:10px;color:var(--accent)">python3 benchmarks/bench.py</code>; hardware notes and the full table live in the README.</p>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="wrap foot">
+    <p>Observatory 0.2.0 · Pure Python, offline by default</p>
+    <div class="links">
+      <a href="../README.md">README</a>
+      <a href="#top">Top</a>
+    </div>
+  </div>
+</footer>
+</body>
+</html>
